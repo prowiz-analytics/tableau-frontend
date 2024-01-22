@@ -24,38 +24,21 @@ function Login() {
     setLoading(true);
     console.log(data);
     try {
-      // const request = await axios.post(`${API}/auth/`, {
-      //   user: data.email,
-      //   pwd: data.password,
-      // },{
-      //   withCredentials: true,
-      // });
-      // console.log(request.data)
-      const request ={
-        status:400,
-        errData:"Bad Credentials"
-      }
-      if(data.email=== "qadencetqg@gmail.com" && data.password === "Prowiz2023%"){
-        request.status = 200;
-      }
-      // console.log(request.data.dashboards)
-      // const stringify = JSON.stringify(request.data.dashboards)
-      // console.log(stringify)
-      // request.data.dashboards=JSON.parse(request.data.dashboards)
+      const request = await axios.post(`${API}/auth/`, {
+        user: data.email,
+        pwd: data.password,
+      },{
+        withCredentials: true,
+      });
+      console.log(request.data)
       if (request.status === 200){
         navigate("/home");
-       
         successNotify("Logged In Sucecssfully");
         setLoading(false);
       }
-      //dummy
-      else{
-        notify(request.errData);
-        setLoading(false);
-      }
     } catch (err) {
-      console.log(err.response.data);
-      notify(err.response.data.detail);
+      console.log(err.response.data.error);
+      notify(err.response.data.error);
       setLoading(false);
     }
     // console.log(request);
