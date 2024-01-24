@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { API } from "../App";
 import axios from "axios";
+import { IoArrowBackSharp } from "react-icons/io5";
 
 function Dashboard() {
   const location = useLocation();
@@ -12,7 +13,10 @@ function Dashboard() {
   const TABLEAU_CONTENT_URL = "qadencebytqg";
   const dash = "";
   useEffect(() => {
-    const parsedUrl = data.split('/').filter((_, i) => i !== 1).join('/')
+    const parsedUrl = data
+      .split("/")
+      .filter((_, i) => i !== 1)
+      .join("/");
     loadTableau(parsedUrl);
   }, []);
   const navigate = useNavigate();
@@ -48,7 +52,14 @@ function Dashboard() {
   return (
     <div className="w-[100vw] h-[100vh] flex flex-col justify-center items-center">
       <div className="h-[80px] w-full bg-[#03111B] flex flex-row justify-between items-center px-8">
-        <p className="text-white  font-[600] text-xl cursor-pointer" onClick={()=>navigate('/home')}>Qadence by TQG</p>
+        <div className="flex flex-row gap-4 justify-center items-center">
+          <IoArrowBackSharp color="#ffffff" size={"3vmin"} className="cursor-pointer" onClick={() => navigate("/home")}/>
+          <p
+            className="text-white  font-[600] text-xl cursor-pointer"
+          >
+            Qadence by TQG
+          </p>
+        </div>
         <p
           className="text-white cursor-pointer"
           onClick={() => {

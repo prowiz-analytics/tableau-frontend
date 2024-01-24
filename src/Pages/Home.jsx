@@ -111,7 +111,7 @@ function Home() {
         </p>
       </div>
       <div className="flex flex-col gap-4 mt-8 ml-8 w-[90%]">
-        <h2 className="ml-[37px] text-xl">Workbooks</h2>
+        <h2 className="ml-[37px] text-xl font-[600]">Workbooks</h2>
         <div className="w-[100%]">
           {loading && (
             <div className="flex flex-row gap-8 ml-[27px]">
@@ -151,14 +151,14 @@ function Home() {
           )}
         </div>
         <div className="w-[80%]">
-          <h2 className="ml-[37px] text-xl">Views</h2>
+          <h2 className="ml-[37px] text-xl font-[600]">Views</h2>
           {/* <Search
             placeholder="input search text"
             enterButton="Search"
             size="large"
             loading
           /> */}
-          <div className="ml-[37px] flex flex-row w-[80vw] justify-between items-center ">
+          <div className="ml-[37px] flex flex-row w-[80vw] justify-end gap-8 items-center ">
             <Space.Compact size="large" className="">
               <Input
                 addonBefore={<FaSearch />}
@@ -210,7 +210,7 @@ function Home() {
                   return (
                     <div className="flex flex-col w-full  gap-4 mt-4">
                       <h2
-                        className="underline"
+                        className="underline cursor-pointer"
                         onClick={() => {
                           navigate(`/dashboard`, {
                             state: { data: item.contentUrl },
@@ -229,7 +229,7 @@ function Home() {
                   return (
                     <div className="flex flex-col w-full  gap-4 mt-4">
                       <h2
-                        className="underline"
+                        className="underline cursor-pointer"
                         onClick={() => {
                           navigate(`/dashboard`, {
                             state: { data: item.contentUrl },
