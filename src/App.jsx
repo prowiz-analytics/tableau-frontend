@@ -4,6 +4,7 @@ import Login from "./Pages/Login";
 import Home from "./Pages/Home";
 import { useState } from "react";
 import Sidenav from "./Components/Sidenav";
+import Dashboard from "./Pages/Dashboard";
 // import { apiService } from "./Services/api_service";
 
 
@@ -43,6 +44,7 @@ const Main = () => {
       {isUserLoggedIn && 
         <Routes>
           <Route path="/home" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       }
     </>

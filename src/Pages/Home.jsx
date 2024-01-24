@@ -5,11 +5,12 @@ import "slick-carousel/slick/slick-theme.css";
 import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import { Input, Skeleton, Space } from "antd";
+import { Input, Skeleton, Space, Spin } from "antd";
 import { API } from "../App";
 import { allWorkBooks } from "../Mock/workbooks";
 import { allViews } from "../Mock/view";
 import { FaSearch } from "react-icons/fa";
+import { LoadingOutlined } from "@ant-design/icons";
 const { Search } = Input;
 
 const SamplePrevArrow = (props) => {
@@ -32,10 +33,11 @@ const SampleNextArrow = (props) => {
 
 function Home() {
   const navigate = useNavigate();
-  const [inputSearch,setInputSearch]=useState("");
+  const [inputSearch, setInputSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [viewsLoading,setViewsLoading] = useState(false);
   const [views, setViews] = useState();
-  const [filteredViews,setFilteredViews]=useState([]);
+  const [filteredViews, setFilteredViews] = useState([]);
   const [workbooks, setWorkBooks] = useState();
   const slideRef = useRef();
   const sliderSettings = {
@@ -50,39 +52,49 @@ function Home() {
   };
 
   const fetchViews = async (id) => {
-    // const getViewForWorkbook = await axios.get(`${API}/tableau/views/${id}`, {
-    //   withCredentials: true,
-    // });
-    const filteredData = allViews.data.views.filter((item) => item.id === id);
-    console.log(filteredData);
-    setViews(filteredData);
+    setViewsLoading(true)
+    const getViewForWorkbook = await axios.get(`${API}/tableau/views/${id}`, {
+      withCredentials: true,
+    });
+    console.log(getViewForWorkbook.data.views);
+    setViews(getViewForWorkbook.data.views);
+    setViewsLoading(false)
   };
 
-  const onSearch = (e)=>{
+  const onSearch = (e) => {
     console.log(e.target.value.length);
-    const searchedViews = views.filter((item)=>item.name.toLowerCase().includes(e.target.value.toLowerCase()))
+    const searchedViews = views.filter((item) =>
+      item.contentUrl.toLowerCase().includes(e.target.value.toLowerCase())
+    );
     setInputSearch(e.target.value);
     setFilteredViews(searchedViews);
-  }
+  };
+
+  const fetchAllViews = async () => {
+    setViewsLoading(true);
+    const allViews = await axios.get(`${API}/tableau/views`, {
+      withCredentials: true,
+    });
+    setViews(allViews.data.views);
+    setViewsLoading(false);
+  };
 
   useEffect(() => {
     fetchAllData();
   }, []);
   const fetchAllData = async () => {
     setLoading(true);
-    // const allViews = await axios.get(`${API}/tableau/views`, {
-    //   withCredentials: true,
-    // });
-    // const allWorkbooks = await axios.get(`${API}/tableau/workbooks`, {
-    //   withCredentials: true,
-    // });
-    setTimeout(() => {
-      setLoading(false);
-    }, 3000);
+    const allViews = await axios.get(`${API}/tableau/views`, {
+      withCredentials: true,
+    });
+    const allWorkBooks = await axios.get(`${API}/tableau/workbooks`, {
+      withCredentials: true,
+    });
     setWorkBooks(allWorkBooks.data.workbooks);
     setViews(allViews.data.views);
-    // setLoading(false)
+    setLoading(false);
   };
+  console.log(filteredViews.length);
   return (
     <div className="w-[100%] h-[100vh] flex-col ">
       <div className="h-[80px] bg-[#03111B] flex flex-row justify-between items-center px-8">
@@ -146,11 +158,22 @@ function Home() {
             size="large"
             loading
           /> */}
-          <div className="ml-[37px] flex flex-row">
+          <div className="ml-[37px] flex flex-row w-[80vw] justify-between items-center ">
             <Space.Compact size="large" className="">
-              <Input addonBefore={<FaSearch />} placeholder="Search For Views Here" onChange={onSearch} />
+              <Input
+                addonBefore={<FaSearch />}
+                placeholder="Search For Views Here"
+                onChange={onSearch}
+              />
             </Space.Compact>
+            <button
+              onClick={fetchAllViews}
+              className="p-2 bg-black text-white rounded-md"
+            >
+              All Views
+            </button>
           </div>
+
           {loading && (
             <>
               {[1, 2, 3, 4, 5].map((item) => {
@@ -168,27 +191,57 @@ function Home() {
             </>
           )}
           {!loading && (
-            <div className="flex flex-col ml-[37px] gap-8">
-              {(filteredViews?.length !==0) && filteredViews?.map((item) => {
-                return (
-                  <div className="flex flex-col w-full  gap-4 mt-4">
-                    <Link to={item.url} target="_blank">
-                      <h2>View {item.name}</h2>
-                    </Link>
-                    <div className="w-[80%] h-[3px] bg-[#03111B33] "></div>
-                  </div>
-                );
-              })}
-              {(filteredViews?.length === 0 && inputSearch?.length === 0)&& views?.map((item) => {
-                return (
-                  <div className="flex flex-col w-full  gap-4 mt-4">
-                    <Link to={item.url} target="_blank">
-                      <h2>View {item.name}</h2>
-                    </Link>
-                    <div className="w-[80%] h-[3px] bg-[#03111B33] "></div>
-                  </div>
-                );
-              })}
+            <div className="flex flex-col ml-[37px] gap-8 h-[50vh] overflow-auto w-[100vw]">
+              {viewsLoading && (
+                <Spin
+                  className="spinning_indicator_views"
+                  indicator={
+                    <LoadingOutlined
+                      style={{
+                        fontSize: 24,
+                      }}
+                      spin
+                    />
+                  }
+                />
+              )}
+              {filteredViews?.length !== 0 &&
+                filteredViews?.map((item) => {
+                  return (
+                    <div className="flex flex-col w-full  gap-4 mt-4">
+                      <h2
+                        className="underline"
+                        onClick={() => {
+                          navigate(`/dashboard`, {
+                            state: { data: item.contentUrl },
+                          });
+                        }}
+                      >
+                        View {item.contentUrl}
+                      </h2>
+                      <div className="w-[80%] h-[3px] bg-[#03111B33] "></div>
+                    </div>
+                  );
+                })}
+              {filteredViews?.length === 0 &&
+                inputSearch?.length === 0 &&
+                views?.map((item) => {
+                  return (
+                    <div className="flex flex-col w-full  gap-4 mt-4">
+                      <h2
+                        className="underline"
+                        onClick={() => {
+                          navigate(`/dashboard`, {
+                            state: { data: item.contentUrl },
+                          });
+                        }}
+                      >
+                        View {item.contentUrl}
+                      </h2>
+                      <div className="w-[80%] h-[3px] bg-[#03111B33] "></div>
+                    </div>
+                  );
+                })}
             </div>
           )}
         </div>

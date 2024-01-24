@@ -5,10 +5,48 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { LoadingOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
+// import { API } from "../App";
+import { useGoogleLogin } from "@react-oauth/google";
+import { apiService } from "../Services/apiService";
 import { API } from "../App";
 
 function Login() {
+  const [token,setToken]=useState("");
+  const [creds,setCreds] = useState({
+    user:"",
+    pwd:""
+  })
+  const googleLogin = useGoogleLogin({
+    onSuccess: (codeResponse) => registerGoogleSignin(codeResponse),
+    onError: (error) => console.log("Login Failed:", error),
+  });
+  async function registerGoogleSignin(payload) {
+    console.log(payload.access_token)
+    setToken(payload.access_token)
+    let header = {}
+    if (payload.access_token.length > 0 ) {
+      header['Authorization'] = `Bearer ${payload.access_token}`; 
+    }
+    const res = await axios.post(
+      `${API}/auth/`,
+      {
+        user: '',
+        pwd: '',
+      },
+      {headers:header},
+      {
+        withCredentials: true,
+      }
+    );
+    console.log(res);
+    if (res.status === 200) {
+      navigate("/home");
+      successNotify("Logged In Sucecssfully");
+      setLoading(false);
+    }
+    // login(payload.access_token);
+  }
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const notify = (data) => toast.error(data);
@@ -24,14 +62,22 @@ function Login() {
     setLoading(true);
     console.log(data);
     try {
-      const request = await axios.post(`${API}/auth/`, {
-        user: data.email,
-        pwd: data.password,
-      },{
-        withCredentials: true,
-      });
-      console.log(request.data)
-      if (request.status === 200){
+      let header = {}
+        if (typeof(token) == 'string' && token.length > 0 ) {
+            header['Authorization'] = `Bearer ${token}`; 
+        }
+      const request = await axios.post(
+        `${API}/auth/`,
+        {
+          user: data.email,
+          pwd: data.password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      console.log(request.data);
+      if (request.status === 200) {
         navigate("/home");
         successNotify("Logged In Sucecssfully");
         setLoading(false);
@@ -113,14 +159,15 @@ function Login() {
               <div className="basis-[33%] h-[1px] bg-[#03111B66]"></div>
             </div>
             <input
-              type="submit"
+              type="button"
+              onClick={googleLogin}
               value="Login with Google ID"
               className="w-[100%] items-center p-4 bg-[#ffffff] border-2 border-[#007AD3] text-[#007AD3] font-bold rounded-md cursor-pointer"
             />
           </form>
         </div>
       </div>
-      <ToastContainer position='top-right' closeOnClick autoClose={false}/>
+      <ToastContainer position="top-right" closeOnClick autoClose={false} />
     </div>
   );
 }
